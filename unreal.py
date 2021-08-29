@@ -11,6 +11,7 @@ EngineScale = 100.0
 class exportBlueprint(bpy.types.Operator):
     bl_idname = "scexport.write_unreal_blueprint_file"
     bl_label = "Save Unreal Blueprint Data"
+    bl_description = "Saves the current hierarchy information as a .txt file that can be copied and pasted into an Unreal Engine actor blueprint"
     
     def GetParentAttachmentText(self, obj):
         text = ""

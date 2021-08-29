@@ -6,17 +6,20 @@ class SCExportPreferences(bpy.types.PropertyGroup):
     output_path: StringProperty(
         name="Export Path",
         subtype='DIR_PATH',
-        default="R:/StarCitizen/StarCitizenCinema/"
+        default="R:/StarCitizen/StarCitizenCinema/",
+        description="Root folder to export all the files to"
     )
     
     asset_path: StringProperty(
         name="Asset Path",
-        default="Objects/"
+        default="Objects/",
+        description="Path to where the object should be stored, under the Export Path"
     )
     
     asset_subpath: StringProperty(
-        name="Asset Subpath",
-        default="Meshes"
+        name="UnrealEngine Asset Subpath",
+        default="Meshes",
+        description="Subdirectory used in Unreal Engine to store the meshes under"
     )
 
 

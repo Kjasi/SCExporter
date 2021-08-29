@@ -2,10 +2,11 @@ import bpy
 
 from .utils import reload_blender_modules
 from . import preferences, panel
-from .. import exportmeshes, unreal #, unity
+from .. import exportmeshes, cleanup, unreal #, unity
 
 modules = [
     exportmeshes,
+    cleanup,
     unreal
     #unity
 ]

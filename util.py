@@ -49,7 +49,8 @@ def getOutputFolder(itemName):
     while (ObjFileName[-1] == "_"):
         ObjFileName = ObjFileName[:-1]
         
-    if outputFolder == os.path.join(props.output_path, props.asset_path):
+    # Check for default asset path
+    if outputFolder == os.path.join(props.output_path, "Objects/"):
         outputFolder = os.path.join(outputFolder, SanitizeName(ObjFileName))
         
     if outputFolder[-1] != "/":

@@ -9,6 +9,7 @@ from .addon.preferences import get_scexport_pref, set_scexport_pref
 class ExportFBXFiles(bpy.types.Operator):
     bl_idname = "scexport.export_fbx_models"
     bl_label = "Export Objects as FBX"
+    bl_description = "Exports meshes in the selected hierarchy as FBX files into the Export Path"
     
     def writeFBXFile(self, prefaceName, object):
         props = bpy.context.scene.StarCitizenExporterPreferences
