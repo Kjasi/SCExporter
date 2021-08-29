@@ -132,6 +132,9 @@ End Object'''
         if ("orig_name" in obj):
             itemname = obj["orig_name"]
         itemname = SanitizeName(itemname)
+        if (itemname == 'Merged' or itemname.startswith('Merged.')):
+            itemname = prefaceName
+        
         text = 'Begin Object Class=/Script/Engine.StaticMeshComponent Name="'+itemname+'_GEN_VARIABLE"'
         
         assetPath = props.asset_path
