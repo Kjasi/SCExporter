@@ -135,7 +135,7 @@ End Object'''
             itemname = SanitizeName(obj["orig_name"])
         elif (itemname == 'Merged' or itemname.startswith('Merged.')):
             itemname = prefaceName
-        else:
+        elif (not itemname.startswith(prefaceName)):
             itemname = prefaceName + "_" + itemname
         
         text = 'Begin Object Class=/Script/Engine.StaticMeshComponent Name="'+itemname+'_GEN_VARIABLE"'
@@ -180,7 +180,7 @@ End Object'''
             itemname = SanitizeName(obj["orig_name"])
         elif (itemname == 'Merged' or itemname.startswith('Merged.')):
             itemname = prefaceName
-        else:
+        elif (not itemname.startswith(prefaceName)):
             itemname = prefaceName + "_" + itemname
         
         text = 'Begin Object Class=/Script/Engine.SkeletalMeshComponent Name="'+itemname+'_GEN_VARIABLE\"'
