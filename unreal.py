@@ -128,12 +128,15 @@ End Object'''
         pos = obj.location
         rot = obj.rotation_euler
         scale = obj.scale
-        itemname = obj.name
+        
+        prefaceName = SanitizeName(prefaceName)
+        itemname = SanitizeName(obj.name)
         if ("orig_name" in obj):
-            itemname = obj["orig_name"]
-        itemname = SanitizeName(itemname)
-        if (itemname == 'Merged' or itemname.startswith('Merged.')):
+            itemname = SanitizeName(obj["orig_name"])
+        elif (itemname == 'Merged' or itemname.startswith('Merged.')):
             itemname = prefaceName
+        else:
+            itemname = prefaceName + "_" + itemname
         
         text = 'Begin Object Class=/Script/Engine.StaticMeshComponent Name="'+itemname+'_GEN_VARIABLE"'
         
@@ -170,10 +173,16 @@ End Object'''
         pos = obj.location
         rot = obj.rotation_euler
         scale = obj.scale
-        itemname = SanitizeName(obj.parent.name)
+        
+        prefaceName = SanitizeName(prefaceName)
+        itemname = SanitizeName(obj.name)
         if ("orig_name" in obj):
-            itemname = obj["orig_name"]
-        itemname = SanitizeName(itemname)
+            itemname = SanitizeName(obj["orig_name"])
+        elif (itemname == 'Merged' or itemname.startswith('Merged.')):
+            itemname = prefaceName
+        else:
+            itemname = prefaceName + "_" + itemname
+        
         text = 'Begin Object Class=/Script/Engine.SkeletalMeshComponent Name="'+itemname+'_GEN_VARIABLE\"'
         
         objName = SanitizeName(itemname)

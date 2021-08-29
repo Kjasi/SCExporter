@@ -23,13 +23,14 @@ class ExportFBXFiles(bpy.types.Operator):
         object.select_set(True)
         object.hide_set(False)
         
-        itemname = object.name
-        if ("orig_name" in object):
-            itemname = object["orig_name"]
-        itemname = SanitizeName(itemname)
         prefaceName = SanitizeName(prefaceName)
-        if (itemname == 'Merged' or itemname.startswith('Merged.')):
+        itemname = SanitizeName(object.name)
+        if ("orig_name" in object):
+            itemname = SanitizeName(object["orig_name"])
+        elif (itemname == 'Merged' or itemname.startswith('Merged.')):
             itemname = prefaceName
+        else:
+            itemname = prefaceName + "_" + itemname
         
         outputFolder = getOutputFolder(prefaceName)
         
