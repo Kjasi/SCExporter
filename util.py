@@ -46,7 +46,7 @@ def getOutputFolder(itemName):
         outputFolder = os.path.join(outputFolder, props.asset_path)
         
     ObjFileName = SanitizeName(itemName)
-    while (ObjFileName[-1] == "_"):
+    while (ObjFileName and ObjFileName[-1] == "_"):
         ObjFileName = ObjFileName[:-1]
         
     # Check for default asset path

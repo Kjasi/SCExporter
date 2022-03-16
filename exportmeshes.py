@@ -58,20 +58,20 @@ class ExportFBXFiles(bpy.types.Operator):
         print("Exporting FBX files...")
         props = bpy.context.scene.StarCitizenExporterPreferences
         
-        TopObj = context.object
-        TopName = TopObj.name
-        if ("orig_name" in TopObj):
-            TopName = TopObj["orig_name"]
+        for TopObj in bpy.context.selected_objects:
+            TopName = TopObj.name
+            if ("orig_name" in TopObj):
+                TopName = TopObj["orig_name"]
+                
+            if ("source_file" in TopObj):
+                props.asset_path = TopObj["source_file"].rsplit('/', maxsplit=1)[0]
+                
+            TopName = SanitizeName(TopName)
+            self.writeFBXFile("", TopObj)
+            children = getChildren(TopObj)
             
-        if ("source_file" in TopObj):
-            props.asset_path = TopObj["source_file"].rsplit('/', maxsplit=1)[0]
-            
-        TopName = SanitizeName(TopName)
-        self.writeFBXFile("", TopObj)
-        children = getChildren(TopObj)
-        
-        for child in children:
-            self.ProcessChildren(TopName, child)
+            for child in children:
+                self.ProcessChildren(TopName, child)
         
         return {'FINISHED'}
     
