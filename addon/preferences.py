@@ -18,8 +18,14 @@ class SCExportPreferences(bpy.types.PropertyGroup):
     
     asset_subpath: StringProperty(
         name="UnrealEngine Asset Subpath",
-        default="Meshes",
+        default="Mesh",
         description="Subdirectory used in Unreal Engine to store the meshes under"
+    )
+    
+    exportBillboards: bpy.props.BoolProperty(
+        name="Export Billboards",
+        default=True,
+        description="If we should export billboard subnodes for objects that don't have a mesh or child blueprint"
     )
 
 

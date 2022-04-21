@@ -54,6 +54,9 @@ class SCEXPORTER_PT_Prefs(SCExporterPanel, bpy.types.Panel):
         
         row = layout.row()
         row.prop(addon_prefs, "asset_subpath")
+        
+        row = layout.row()
+        row.prop(addon_prefs, "exportBillboards")
 
 class SCEXPORTER_PT_Cleanup(SCExporterPanel, bpy.types.Panel):
     bl_parent_id  = "SCEXPORTER_PT_UI_MAIN"

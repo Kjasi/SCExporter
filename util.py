@@ -59,3 +59,8 @@ def getOutputFolder(itemName):
     outputFolder = outputFolder.replace("//", "/")
 
     return outputFolder
+    
+def getMeshName(sourceFilename):
+    # objects/spaceships/ships/anvl/pisces/anvl_pisces.cga to anvl_pisces
+    orig_name = sourceFilename[sourceFilename.rfind('/')+1:-4]
+    return orig_name
