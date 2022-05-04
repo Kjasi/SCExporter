@@ -377,6 +377,7 @@ End Object'''
     def execute(self, context):
         print("\n\nSaving Blueprint Data to a file...")
         props = bpy.context.scene.StarCitizenExporterPreferences
+        self.CollectionsToExport = []
         object = context.object
         if (not object):
             print("\nNo Object selected. Unable to save file.")

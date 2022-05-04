@@ -83,6 +83,7 @@ class ExportFBXFiles(bpy.types.Operator):
     def execute(self, context):
         print("Exporting FBX files...")
         props = bpy.context.scene.StarCitizenExporterPreferences
+        self.CollectionList = []
         
         for TopObj in bpy.context.selected_objects:
             TopName = TopObj.name
@@ -109,13 +110,14 @@ class ExportFBXFiles(bpy.types.Operator):
                 for child in children:
                     self.ProcessChildren(child)
 
-
-        bpy.context.window.scene = bpy.data.scenes["StarFab"]
+        if ("StarFab" in bpy.data.scenes):
+            bpy.context.window.scene = bpy.data.scenes["StarFab"]
         if len(self.MeshesToExport) > 0:
             for meshObject in self.MeshesToExport:
                 self.writeFBXFile(TopName, meshObject)
-                
-        bpy.context.window.scene = bpy.data.scenes["Scene"]
+        
+        if (bpy.context.window.scene != bpy.data.scenes["Scene"]):
+            bpy.context.window.scene = bpy.data.scenes["Scene"]
         self.CollectionList = []
         
         
