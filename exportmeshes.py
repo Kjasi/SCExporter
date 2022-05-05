@@ -45,7 +45,10 @@ class ExportFBXFiles(bpy.types.Operator):
             filename = object["source_file"].rsplit('/', maxsplit=1)[1]
             filename = filename.rsplit('.', maxsplit=1)[0]
             props.asset_path = filepath
-            itemname = ("%s_%s" % (filename, itemname))
+            if itemname.casefold() == filename.casefold():
+                itemname = filename
+            else:
+                itemname = ("%s_%s" % (filename, itemname))
         
         print("Itemname: %s, AssetPath: %s" %(itemname, props.asset_path))
         outputFolder = getOutputFolder(prefaceName)

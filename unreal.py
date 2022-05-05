@@ -41,30 +41,61 @@ class exportBlueprint(bpy.types.Operator):
     RelativeScale3D=(X=%s,Y=%s,Z=%s)''' % (str(scale[0]), str(scale[1]), str(scale[2]))
     
         return text
+
+    def GetItemName(self, prefaceName, obj, ByPassRepeatFix = False):
+        itemname = obj.name
+        print("Getting Name for %s" % itemname)
+        
+        if ("BlueprintName" in obj):
+            itemname = obj["BlueprintName"]
+            print("  Blueprint Name: %s" % itemname)
+        else:
+            if ("filename" in obj):
+                itemname = getMeshName(obj["filename"])
+                print("  FileName: %s" % itemname)
+            if ("orig_name" in obj):
+                itemname = obj["orig_name"]
+                print("  Orig Name: %s" % itemname)
+                if ("source_file" in obj):
+                    sourceFile = obj["source_file"].rsplit('/', maxsplit=1)[1]
+                    sourceFile = sourceFile.rsplit('.', maxsplit=1)[0]
+                    print("  SourceName: %s" % sourceFile)
+                    if sourceFile.casefold() != itemname.casefold():
+                        itemname = ("%s_%s"%(sourceFile, itemname))
+                        print("  Orig+Source Name: %s" % itemname)
+
+        itemname = SanitizeName(itemname)
+        print("-Final Name: %s" % itemname)
+
+        #if prefaceName.casefold() not in itemname.casefold():
+        #    itemname = ("%s_%s"%(prefaceName, itemname))
+
+        itemname = SanitizeName(itemname)
+        if (ByPassRepeatFix == False):
+            itemname = self.FixRepeatNames(itemname)
+        
+        return itemname
     
     def GetParentAttachmentText(self, prefaceName, obj):
         text = ""
         if (obj.parent):
-            prefaceName = SanitizeName(prefaceName)
+            print("Looking for parent for %s, Preface: %s" % (obj.name, prefaceName))
             
-            parentname = obj.parent.name
-            if ("filename" in obj.parent):
-                parentname = getMeshName(obj.parent["filename"])
-            if ("orig_name" in obj.parent):
-                parentname = obj.parent["orig_name"]
-            if ("BlueprintName" in obj.parent):
-                parentname = obj["BlueprintName"]
-            parentname = SanitizeName(parentname)
-            
+            parentname = self.GetItemName(prefaceName, obj.parent, True)
+            print("  ParentName = GIN: %s" % parentname)
+            if "Armature" in parentname:
+                return ""
+            print("Final ParentName: %s" % parentname)
+
             text = '''
     AttachParent='''
             if (obj.parent.type == "ARMATURE"):
-                text += 'SkeletalMeshComponent'+''''"'''+prefaceName+'_'
+                text += 'SkeletalMeshComponent\'{parent_name}_GEN_VARIABLE\''.format(parent_name=parentname)
             elif (obj.parent.type == "MESH"):
-                text += 'StaticMeshComponent'+''''"'''+prefaceName+'_'
+                text += 'StaticMeshComponent\'{parent_name}_GEN_VARIABLE\''.format(parent_name=parentname)
             else:
-                text += 'SceneComponent'+''''"'''
-            text += parentname+'_GEN_VARIABLE\"\''
+                text += 'SceneComponent\'{parent_name}_GEN_VARIABLE\''.format(parent_name=parentname)
+            print("-- Parent Name: %s\n-- Text: %s" % (parentname, text))
         return text
     
     def GenerateSceneComponent(self, prefaceName, obj, skipbillboard = False):
@@ -72,13 +103,7 @@ class exportBlueprint(bpy.types.Operator):
         pos = obj.location
         rot = obj.rotation_euler
         scale = obj.scale
-        itemname = obj.name
-        if ("filename" in obj):
-            itemname = getMeshName(obj["filename"])
-        if ("orig_name" in obj):
-            itemname = SanitizeName(obj["orig_name"])
-        itemname = SanitizeName(itemname)
-        itemname = self.FixRepeatNames(itemname)
+        itemname = self.GetItemName(prefaceName, obj)
         obj["BlueprintName"] = itemname
         
         text = 'Begin Object Class=/Script/Engine.SceneComponent Name="'+itemname+'_GEN_VARIABLE\"'
@@ -130,7 +155,7 @@ End Object''' % (itemname, itemname)
     Begin Object Name="{itemname}_GEN_VARIABLE_{itemname}_C_CAT"
         ActorLabel="{itemname}-1"
     End Object
-    ChildActorClass=BlueprintGeneratedClass'"/Game/{path}/{itemname}.{itemname}_C"\''''.format(
+    ChildActorClass=BlueprintGeneratedClass'/Game/{path}/{itemname}.{itemname}_C\''''.format(
         path=itempath,
         itemname=itemname
         )
@@ -201,32 +226,12 @@ End Object'''
         scale = obj.scale
         
         prefaceName = SanitizeName(prefaceName)
-        itemname = SanitizeName(obj.name)
-        
-        if ("filename" in obj):
-            itemname = getMeshName(obj["filename"])
-        elif ("orig_name" in obj):
-            itemname = obj["orig_name"]
-        elif (itemname == 'Merged' or itemname.startswith('Merged.')):
-            itemname = prefaceName
-        elif (not itemname.startswith(prefaceName)):
-            itemname = prefaceName + "_" + itemname
-
-        itemname = self.FixRepeatNames(itemname)
+        itemname = self.GetItemName(prefaceName, obj)
         obj["BlueprintName"] = itemname
-
-        itempath = props.asset_path
-        if ("source_file" in obj):
-            filepath = obj["source_file"].rsplit('/', maxsplit=1)[0]
-            filename = obj["source_file"].rsplit('/', maxsplit=1)[1]
-            filename = filename.rsplit('.', maxsplit=1)[0]
-            itempath = filepath
-            itemname = ("%s_%s" % (filename, itemname))
         
-        itemname = SanitizeName(itemname)
         text = 'Begin Object Class=/Script/Engine.StaticMeshComponent Name="'+itemname+'_GEN_VARIABLE"'
         
-        assetPath = itempath
+        assetPath = props.asset_path
         if (props.asset_subpath != ""):
             assetPath += '/' + props.asset_subpath
         assetPath = assetPath.strip("/")
@@ -234,7 +239,7 @@ End Object'''
         assetPath = assetPath.replace("//", "/")
         
         text += '''
-    StaticMesh=StaticMesh'"/Game/'''+assetPath+"/"+itemname+"."+itemname+'''"'
+    StaticMesh=StaticMesh'/Game/'''+assetPath+"/"+itemname+"."+itemname+''''
     StaticMeshImportVersion=1'''
     
         text += self.GetTransformText(pos, rot, scale)
@@ -250,17 +255,7 @@ End Object'''
         scale = obj.scale
         
         prefaceName = SanitizeName(prefaceName)
-        itemname = SanitizeName(obj.name)
-        if ("filename" in obj):
-            itemname = SanitizeName(getMeshName(obj["filename"]))
-        if ("orig_name" in obj):
-            itemname = SanitizeName(obj["orig_name"])
-        elif (itemname == 'Merged' or itemname.startswith('Merged.')):
-            itemname = prefaceName
-        elif (not itemname.startswith(prefaceName)):
-            itemname = prefaceName + "_" + itemname
-
-        itemname = self.FixRepeatNames(itemname)
+        itemname = self.GetItemName(prefaceName, obj)
         obj["BlueprintName"] = itemname
         
         text = 'Begin Object Class=/Script/Engine.SkeletalMeshComponent Name="'+itemname+'_GEN_VARIABLE\"'
@@ -274,7 +269,7 @@ End Object'''
         assetPath = assetPath.replace("//", "/")
         
         text += '''
-    SkeletalMesh=SkeletalMesh'"/Game/'''+assetPath+"/"+objName+"."+objName+'\'"'
+    SkeletalMesh=SkeletalMesh'/Game/'''+assetPath+"/"+objName+"."+objName+'\''
         
         text += self.GetTransformText(pos, rot, scale)
         text += self.GetParentAttachmentText(prefaceName, obj)
@@ -362,7 +357,7 @@ End Object'''
             
         #print("ObjFileName: %s" % ObjFileName)
         
-        filename = outputFolder + SanitizeName(ObjFileName) + ".txt"
+        filename = outputFolder + SanitizeName(prefaceName) + ".txt"
         print("Writing Unreal Blueprint file: "+filename)
         
         # open a file to write to
@@ -398,15 +393,33 @@ End Object'''
             for collectionName in self.CollectionsToExport:
                 print("Attempting to Write BP file for %s" % (collectionName))
                 topItem = bpy.data.collections[collectionName].objects[0]
+                children = getChildren(topItem)
+                meshChildOrigName = ""
+                if topItem.type == "ARMATURE":
+                    hasMeshChild = False
+                    for child in children:
+                        if child.type == "MESH":
+                            hasMeshChild = True
+                            if ("orig_name" in child):
+                                meshChildOrigName = SanitizeName(child["orig_name"])
+                            break
+                    if hasMeshChild == False:
+                        continue
                 
                 if "source_file" in topItem:
                     props.asset_path = topItem["source_file"].rsplit('/', maxsplit=1)[0]
                     
                 objName = topItem.name
-                if ("filename" in topItem):
+                if "filename" in topItem:
                     objName = getMeshName(topItem["filename"])
-                if ("orig_name" in topItem):
+                if "orig_name" in topItem:
                     objName = SanitizeName(topItem["orig_name"])
+                if meshChildOrigName != "":
+                    objName = meshChildOrigName
+                if objName == "Merged":
+                    if "orig_name" in topItem.parent:
+                        objName = SanitizeName(topItem.parent["orig_name"])
+
                 objName = SanitizeName(objName)
             
                 self.writeBlueprintFile(objName, topItem)
